@@ -1,0 +1,22 @@
+{
+    "name": "teamux-web",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite --host 0.0.0.0 --port 5173",
+        "build": "vite build",
+        "preview": "vite preview --host"
+    },
+    "dependencies": {
+        "axios": "^1.7.7",
+        "vue": "^3.5.11",
+        "vuetify": "^3.7.1",
+        "@mdi/font": "^7.4.47"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^5.1.4",
+        "vite": "^5.4.10",
+        "sass": "^1.80.4",
+        "typescript": "^5.6.3"
+    }
+}
