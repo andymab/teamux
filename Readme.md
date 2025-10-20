@@ -26,12 +26,15 @@ teamux/
 │  ├─ Dockerfile
 │  ├─ requirements.txt
 │  └─ app/
-│     ├─ main.py              # FastAPI-приложение и роуты
-│     ├─ deps.py              # CORS, проверка токена
-│     ├─ groq_client.py       # Анализ текста через Groq API
-│     ├─ fetcher.py           # Загрузка и очистка HTML‑статей
-│     ├─ stability.py         # Генерация изображений через Stability
-│     └─ telegram.py          # Публикация постов в Telegram
+│     ├─ main.py # FastAPI-приложение и роуты
+│     ├─ deps.py # CORS, проверка токена
+│     ├─ groq_client.py # Анализ текста через Groq API
+│     ├─ post_builder.py # Генерация постов из шаблонов (Groq)
+│     ├─ fetcher.py # Загрузка и очистка HTML-статей
+│     ├─ stability.py # Генерация изображений через Stability
+│     ├─ telegram.py # Публикация постов в Telegram
+│     └─ templates/
+│     └─ prompt_tg_post_ru.txt # Шаблон промпта для поста
 └─ web/
    ├─ Dockerfile
    ├─ index.html
