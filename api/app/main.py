@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel, Field
+from typing import Optional
 from .deps import setup_cors, require_token
 from .fetcher import fetch_and_extract
 from .groq_client import analyze_text
@@ -28,12 +29,18 @@ class PostBuildBody(BaseModel):
 
 class AnalyzeBody(BaseModel):
     text: str
-    model: str | None = None
+    model: Optional[str] = None
+    prompt: Optional[str] = None  # Новое поле для кастомного промта
+    utm: Optional[str] = ""  # UTM метка
+    site: Optional[str] = ""  # Сайт для ссылки
 
 
 class AnalyzeUrlBody(BaseModel):
     url: str
-    model: str | None = None
+    model: Optional[str] = None
+    prompt: Optional[str] = None  # Новое поле для кастомного промта
+    utm: Optional[str] = ""  # UTM метка  
+    site: Optional[str] = ""  # Сайт для ссылки
 
 
 class PublishBody(BaseModel):
@@ -61,7 +68,14 @@ async def post_build(body: PostBuildBody, _=Depends(require_token)):
 @app.post("/analyze")
 async def post_analyze(body: AnalyzeBody, _=Depends(require_token)):
     try:
-        result = await analyze_text(body.text, body.model)
+        result = await build_post(
+            summary=body.text,
+            utm=body.utm or "",
+            site=body.site or "",
+            source_url=None,
+            model=body.model,
+            custom_prompt=body.prompt  # Передаем кастомный промт если есть
+        )
         return result
     except Exception as e:
         raise HTTPException(500, str(e))
@@ -71,7 +85,19 @@ async def post_analyze(body: AnalyzeBody, _=Depends(require_token)):
 async def post_analyze_url(body: AnalyzeUrlBody, _=Depends(require_token)):
     try:
         content = await fetch_and_extract(body.url)
-        result = await analyze_text(content, body.model)
+        
+        # Если нужен промт из URL, можно добавить так:
+        # prompt_content = await fetch_and_extract(body.prompt_url) if body.prompt_url else body.prompt
+        
+        result = await build_post(
+            summary=content,
+            utm=body.utm or "",
+            site=body.site or "",
+            source_url=body.url,  
+            model=body.model,
+            custom_prompt=body.prompt
+        )
+        
         return {"source": body.url, **result}
     except Exception as e:
         raise HTTPException(500, str(e))
