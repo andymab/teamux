@@ -14,7 +14,13 @@ def _load_default_prompt() -> str:
     with open(PROMPT_FILE, "r", encoding="utf-8") as f:
         return f.read()
 
-def _render_prompt(summary: str, utm: str, site: str, source_url: Optional[str] = None, custom_prompt: Optional[str] = None) -> str:
+def _render_prompt(
+    summary: str, 
+    utm: str, 
+    site: str, 
+    source_url: Optional[str] = None, 
+    custom_prompt: Optional[str] = None
+) -> str:
 
 
         if custom_prompt:
