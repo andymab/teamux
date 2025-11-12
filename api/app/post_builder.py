@@ -23,7 +23,7 @@ def _render_prompt(
 ) -> str:
 
 
-        if custom_prompt:
+    if custom_prompt:
         # Если передан кастомный промт, используем его как основу
         base_prompt = custom_prompt
     else:
