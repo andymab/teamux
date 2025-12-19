@@ -16,6 +16,7 @@ from .image_gen_stability import (
     StabilityRateLimitError, StabilityTemporaryError, StabilityBadRequest
 )
 
+import json
 
 app = FastAPI(title="teamux API")
 setup_cors(app)
@@ -54,6 +55,113 @@ class ImageBody(BaseModel):
     negative_prompt: str | None = None
     seed: int | None = None
     return_base64: bool | None = False     # если нужно вернуть картинку на фронт
+
+
+class IChingBody(BaseModel):
+    histogram: str = Field(..., example="100101111")
+    model: Optional[str] = None
+
+def normalize_histogram(value: str) -> tuple[str, str]:
+    clean = value.replace(" ", "")
+    if any(c not in "01" for c in clean):
+        raise HTTPException(400, "Histogram must contain only 0 or 1")
+
+    if len(clean) == 6:
+        return clean, "classic"
+
+    if len(clean) == 9:
+        return clean, "extended"
+
+    raise HTTPException(
+        status_code=400,
+        detail="Histogram must be 6 (classic) or 9 (extended) bits"
+    )
+
+
+ICHING_PROMPT_CLASSIC = """
+Ты — знаток «Книги Перемен» (И Цзин).
+
+Передана классическая гексаграмма из 6 линий
+(снизу вверх, 0 — инь, 1 — ян).
+
+Гексаграмма: {histogram}
+
+Верни СТРОГО валидный JSON:
+{{
+  "type": "classic",
+  "hexagram": "Название гексаграммы",
+  "summary": "Краткое толкование",
+  "article": "Развернутый комментарий",
+  "advice": "Практический совет"
+}}
+
+Язык: русский.
+"""
+
+
+ICHING_PROMPT_EXTENDED = """
+Ты — знаток «Книги Перемен» (И Цзин).
+
+Передана расширенная гистограмма из 9 бит.
+Каждые 3 бита образуют триграмму:
+
+- первые 3 — ПРОШЛОЕ (основание ситуации)
+- вторые 3 — НАСТОЯЩЕЕ (текущий процесс)
+- третьи 3 — БУДУЩЕЕ (направление изменений)
+
+Гистограмма: {histogram}
+
+Интерпретируй три состояния как единый процесс изменений.
+
+Верни СТРОГО валидный JSON:
+{{
+  "type": "extended",
+  "past": {{ "trigram": "", "meaning": "" }},
+  "present": {{ "trigram": "", "meaning": "" }},
+  "future": {{ "trigram": "", "meaning": "" }},
+  "article": "Целостная статья",
+  "advice": "Практический совет"
+}}
+
+Язык: русский.
+Стиль: философский, без мистики.
+"""
+
+@app.post("/iching")
+async def iching(body: IChingBody):
+    try:
+        histogram, mode = normalize_histogram(body.histogram)
+        model = body.model or "llama3-70b-8192"
+
+        if mode == "classic":
+            prompt = ICHING_PROMPT_CLASSIC.format(histogram=histogram)
+        else:
+            prompt = ICHING_PROMPT_EXTENDED.format(histogram=histogram)
+
+        raw = await analyze_text(
+            text="",
+            model=model,
+            custom_prompt=prompt
+        )
+
+        try:
+            result = json.loads(raw)
+        except json.JSONDecodeError:
+            raise HTTPException(
+                status_code=502,
+                detail="Model returned invalid JSON"
+            )
+
+        return {
+            "ok": True,
+            "histogram": histogram,
+            "result": result
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 
 @app.post("/post/build")

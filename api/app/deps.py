@@ -10,6 +10,7 @@ def setup_cors(app: FastAPI):
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[o.strip() for o in origins],
+        allow_origin_regex=r"https?://.*\.355042\.ru",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
