@@ -6,7 +6,7 @@ from fastapi import FastAPI, Header, HTTPException
 
 
 def setup_cors(app: FastAPI):
-    origins = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
+    origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,https://teamux-news.355042.ru").split(",")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[o.strip() for o in origins],
