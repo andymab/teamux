@@ -139,7 +139,7 @@ async def iching(body: IChingBody):
             prompt = ICHING_PROMPT_EXTENDED.format(histogram=histogram)
 
         raw = await analyze_text(
-            text="",
+            content="",
             model=model,
             custom_prompt=prompt
         )
