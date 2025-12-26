@@ -144,6 +144,14 @@ async def iching(body: IChingBody):
             custom_prompt=prompt
         )
 
+        return {
+            "ok": True,
+            "histogram": histogram,
+            "raw_text": raw["text"],
+            "usage": raw.get("usage", {}),
+            "model": raw.get("model", model)
+        }
+
         try:
             result = json.loads(raw)
         except json.JSONDecodeError:
