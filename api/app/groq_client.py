@@ -21,20 +21,27 @@ PROMPT_TEMPLATE = (
 )
 
 
-async def analyze_text(content: str, model: str | None = None) -> dict:
+async def analyze_text(content: str, model: str | None = None, custom_prompt: str | None = None) -> dict:
     assert GROQ_API_KEY, "GROQ_API_KEY is missing"
     model = model or DEFAULT_MODEL
 
 
+    if custom_prompt:
+        prompt = custom_prompt
+    else:
+        # Подставляем стандартный шаблон
+        content = (content[:12000] + "\n\n...[текст обрезан]") if len(content) > 12000 else content
+        prompt = PROMPT_TEMPLATE.format(content=content)
+
     # Подрежем на всякий случай ~12k символов
-    content = (content[:12000] + "\n\n...[текст обрезан]") if len(content) > 12000 else content
+    #content = (content[:12000] + "\n\n...[текст обрезан]") if len(content) > 12000 else content
 
 
     payload = {
     "model": model,
     "temperature": 0.7,
     "max_tokens": 800,
-    "messages": [{"role": "user", "content": PROMPT_TEMPLATE.format(content=content)}],
+    "messages": [{"role": "user", "content": prompt}],
     }
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
 
