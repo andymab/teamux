@@ -17,6 +17,7 @@ from .image_gen_stability import (
 )
 
 import json
+import re
 
 app = FastAPI(title="teamux API")
 setup_cors(app)
@@ -85,7 +86,11 @@ ICHING_PROMPT_CLASSIC = """
 
 Гексаграмма: {histogram}
 
-Верни строго валидный JSON с полями:
+Return ONLY a valid JSON object.
+No markdown.
+No comments.
+No explanations.
+with params
 {{
   "type": "classic",
   "hexagram": "Название гексаграммы",
@@ -142,18 +147,22 @@ async def iching(body: IChingBody):
             custom_prompt=prompt
         )
 
-        return {
-            "ok": True,
-            "histogram": histogram,
-            "raw_text": raw["text"],
-            "usage": raw.get("usage", {}),
-            "model": raw.get("model", model)
-        }
+        # return {
+        #     "ok": True,
+        #     "histogram": histogram,
+        #     "raw_text": raw["text"],
+        #     "usage": raw.get("usage", {}),
+        #     "model": raw.get("model", model)
+        # }
 
         text = raw["text"]
 
+        match = re.search(r'\{[\s\S]*\}', text)
+        if not match:
+            raise ValueError("JSON не найден в ответе ИИ")
+
         try:
-            result = json.loads(text)
+            result = json.loads(match.group(0))
         except json.JSONDecodeError:
             raise HTTPException(
                 status_code=502,
