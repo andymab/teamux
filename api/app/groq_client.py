@@ -44,7 +44,7 @@ async def analyze_text(content: str, model: str | None = None, custom_prompt: st
     "messages": [{"role": "user", "content": prompt}],
     }
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-
+    return {"text": prompt, "usage": headers}
 
     async with httpx.AsyncClient(timeout=60) as client:
         r = await client.post(GROQ_URL, headers=headers, json=payload)
