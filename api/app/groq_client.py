@@ -44,7 +44,7 @@ async def analyze_text(content: str, model: str | None = None, custom_prompt: st
     "max_tokens": 800,
     "messages": [{"role": "user", "content": prompt}],
     }
-    headers = {"Authorization": "Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
+    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
 
     #return json.dumps({"text": prompt, "usage": headers})
 
