@@ -59,7 +59,7 @@ class ImageBody(BaseModel):
 
 
 class IChingBody(BaseModel):
-    histogram: str = Field(..., example="100101111")
+    histogram: str = Field(..., example="隨 - Следование")
     model: Optional[str] = None
 
 # def normalize_histogram(value: str) -> tuple[str, str]:
