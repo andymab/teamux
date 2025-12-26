@@ -87,13 +87,13 @@ ICHING_PROMPT_CLASSIC = """
 Гексаграмма: {histogram}
 
 Верни СТРОГО валидный JSON:
-{{
+{
   "type": "classic",
   "hexagram": "Название гексаграммы",
   "summary": "Краткое толкование",
   "article": "Развернутый комментарий",
   "advice": "Практический совет"
-}}
+}
 
 Язык: русский.
 """
@@ -114,14 +114,14 @@ ICHING_PROMPT_EXTENDED = """
 Интерпретируй три состояния как единый процесс изменений.
 
 Верни СТРОГО валидный JSON:
-{{
+{
   "type": "extended",
-  "past": {{ "trigram": "", "meaning": "" }},
-  "present": {{ "trigram": "", "meaning": "" }},
-  "future": {{ "trigram": "", "meaning": "" }},
+  "past": { "trigram": "", "meaning": "" },
+  "present": { "trigram": "", "meaning": "" },
+  "future": { "trigram": "", "meaning": "" },
   "article": "Целостная статья",
   "advice": "Практический совет"
-}}
+}
 
 Язык: русский.
 Стиль: философский, без мистики.
