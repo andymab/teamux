@@ -142,16 +142,18 @@ async def iching(body: IChingBody):
             custom_prompt=prompt
         )
 
-        return {
-            "ok": True,
-            "histogram": histogram,
-            "raw_text": raw["text"],
-            "usage": raw.get("usage", {}),
-            "model": raw.get("model", model)
-        }
+        # return {
+        #     "ok": True,
+        #     "histogram": histogram,
+        #     "raw_text": raw["text"],
+        #     "usage": raw.get("usage", {}),
+        #     "model": raw.get("model", model)
+        # }
+
+        text = raw["text"]
 
         try:
-            result = json.loads(raw)
+            result = json.loads(text)
         except json.JSONDecodeError:
             raise HTTPException(
                 status_code=502,
@@ -161,7 +163,9 @@ async def iching(body: IChingBody):
         return {
             "ok": True,
             "histogram": histogram,
-            "result": result
+            "result": result,
+            "usage": raw.get("usage", {}),
+            "model": raw.get("model", model),
         }
 
     except HTTPException:
