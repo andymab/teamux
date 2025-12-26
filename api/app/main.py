@@ -130,7 +130,7 @@ ICHING_PROMPT_EXTENDED = """
 async def iching(body: IChingBody):
     try:
         histogram, mode = normalize_histogram(body.histogram)
-        model = body.model or "llama3-70b-8192"
+        model = body.model or "llama-3.3-70b-versatile"
 
         if mode == "classic":
             prompt = ICHING_PROMPT_CLASSIC.format(histogram=histogram)
