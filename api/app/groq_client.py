@@ -46,7 +46,7 @@ async def analyze_text(content: str, model: str | None = None, custom_prompt: st
     }
     headers = {"Authorization": "Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
 
-    return json.dumps({"text": prompt, "usage": headers})
+    #return json.dumps({"text": prompt, "usage": headers})
 
 
     async with httpx.AsyncClient(timeout=60) as client:
