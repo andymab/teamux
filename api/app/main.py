@@ -17,6 +17,7 @@ from .image_gen_stability import (
 )
 
 import json
+import re
 
 app = FastAPI(title="teamux API")
 setup_cors(app)
@@ -58,34 +59,41 @@ class ImageBody(BaseModel):
 
 
 class IChingBody(BaseModel):
-    histogram: str = Field(..., example="100101111")
+    histogram: str = Field(..., example="隨 - Следование")
     model: Optional[str] = None
 
-def normalize_histogram(value: str) -> tuple[str, str]:
-    clean = value.replace(" ", "")
-    if any(c not in "01" for c in clean):
-        raise HTTPException(400, "Histogram must contain only 0 or 1")
+# def normalize_histogram(value: str) -> tuple[str, str]:
+#     clean = value.replace(" ", "")
+#     if any(c not in "01" for c in clean):
+#         raise HTTPException(400, "Histogram must contain only 0 or 1")
 
-    if len(clean) == 6:
-        return clean, "classic"
+#     if len(clean) == 6:
+#         return clean, "classic"
 
-    if len(clean) == 9:
-        return clean, "extended"
+#     if len(clean) == 9:
+#         return clean, "extended"
 
-    raise HTTPException(
-        status_code=400,
-        detail="Histogram must be 6 (classic) or 9 (extended) bits"
-    )
+#     raise HTTPException(
+#         status_code=400,
+#         detail="Histogram must be 6 (classic) or 9 (extended) bits"
+#     )
 
 
 ICHING_PROMPT_CLASSIC = """
 Ты — знаток «Книги Перемен» (И Цзин).
 
-Передана классическая гексаграмма из 6 линий (снизу вверх, 0 — инь, 1 — ян).
+ДАНО (НЕ ИЗМЕНЯТЬ):
+- Система: Вэнь-ван
+- Гексаграмма: {histogram}
 
-Гексаграмма: {histogram}
+ЗАДАЧА:
+Дай трактовку данной гексаграммы.
 
-Верни строго валидный JSON с полями:
+Return ONLY a valid JSON object.
+No markdown.
+No comments.
+No explanations.
+with params
 {{
   "type": "classic",
   "hexagram": "Название гексаграммы",
@@ -128,7 +136,9 @@ ICHING_PROMPT_EXTENDED = """
 @app.post("/iching")
 async def iching(body: IChingBody):
     try:
-        histogram, mode = normalize_histogram(body.histogram)
+        # histogram, mode = normalize_histogram(body.histogram)
+        histogram = body.histogram
+        mode = "classic"
         model = body.model or "llama-3.3-70b-versatile"
 
         if mode == "classic":
@@ -152,8 +162,12 @@ async def iching(body: IChingBody):
 
         text = raw["text"]
 
+        match = re.search(r'\{[\s\S]*\}', text)
+        if not match:
+            raise ValueError("JSON не найден в ответе ИИ")
+
         try:
-            result = json.loads(text)
+            result = json.loads(match.group(0))
         except json.JSONDecodeError:
             raise HTTPException(
                 status_code=502,
